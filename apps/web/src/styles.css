@@ -1,0 +1,415 @@
+:root {
+  --bg: #ffffff;
+  --bg-sub: #f3f4f6;
+  --fg: #111827;
+  --fg-sub: #6b7280;
+  --border: #e5e7eb;
+  --primary: #2563eb;
+  --primary-fg: #ffffff;
+  --selected: #dbeafe;
+  --danger: #dc2626;
+  --warning: #d97706;
+  --tag-bg: #eef2ff;
+  --tag-fg: #3730a3;
+  color-scheme: light dark;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Hiragino Sans",
+    "Noto Sans JP",
+    sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111827;
+    --bg-sub: #1f2937;
+    --fg: #f9fafb;
+    --fg-sub: #9ca3af;
+    --border: #374151;
+    --primary: #3b82f6;
+    --selected: #1e3a8a;
+    --danger: #f87171;
+    --warning: #fbbf24;
+    --tag-bg: #312e81;
+    --tag-fg: #e0e7ff;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+input,
+select,
+textarea {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: var(--bg);
+  min-width: 0;
+}
+
+button {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  background: var(--bg-sub);
+  cursor: pointer;
+}
+
+button.primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-fg);
+}
+
+button.danger {
+  color: var(--danger);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 1;
+}
+
+.logo {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.header nav {
+  display: flex;
+  gap: 12px;
+}
+
+.header nav a {
+  color: var(--fg-sub);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.header nav a[aria-current="page"] {
+  color: var(--primary);
+  font-weight: bold;
+}
+
+.email {
+  margin-left: auto;
+  color: var(--fg-sub);
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.help-button {
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 12px 16px 80px;
+}
+
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.quick-add {
+  display: flex;
+  gap: 8px;
+}
+
+.quick-add input {
+  flex: 1;
+}
+
+.filters {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.checkbox {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  color: var(--fg-sub);
+}
+
+.group-label {
+  font-size: 13px;
+  color: var(--fg-sub);
+  margin: 16px 0 4px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--border);
+}
+
+.group-label.past {
+  color: var(--danger);
+}
+
+.todo-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.todo-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.todo-item.selected {
+  background: var(--selected);
+}
+
+.todo-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
+.todo-title {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 2px 0;
+  overflow-wrap: anywhere;
+}
+
+.todo-item.done .todo-title {
+  text-decoration: line-through;
+  color: var(--fg-sub);
+}
+
+.todo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.tag {
+  background: var(--tag-bg);
+  color: var(--tag-fg);
+  border-radius: 999px;
+  padding: 0 8px;
+}
+
+.due {
+  color: var(--fg-sub);
+}
+
+.due-overdue {
+  color: var(--danger);
+  font-weight: bold;
+}
+
+.due-soon {
+  color: var(--warning);
+  font-weight: bold;
+}
+
+.empty,
+.hint {
+  color: var(--fg-sub);
+  font-size: 13px;
+}
+
+.error {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--danger);
+  font-size: 13px;
+  margin: 4px 0;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 40%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 12px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.modal {
+  background: var(--bg);
+  border-radius: 10px;
+  padding: 16px;
+  width: 100%;
+  max-width: 520px;
+}
+
+.modal-title {
+  margin: 0 0 12px;
+  font-size: 17px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--fg-sub);
+}
+
+.field label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.field input,
+.field textarea {
+  color: var(--fg);
+  font-size: 15px;
+}
+
+.date-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.date-buttons button {
+  padding: 2px 8px;
+  font-size: 13px;
+}
+
+.help-list {
+  margin: 0;
+}
+
+.help-list div {
+  display: flex;
+  gap: 12px;
+  padding: 4px 0;
+}
+
+.help-list dt {
+  min-width: 160px;
+}
+
+.help-list dd {
+  margin: 0;
+}
+
+kbd {
+  background: var(--bg-sub);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0 6px;
+  font-size: 13px;
+}
+
+.tokens {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.tokens th,
+.tokens td {
+  text-align: left;
+  padding: 6px 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.issued-token {
+  border: 1px solid var(--primary);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.issued-token code {
+  display: block;
+  word-break: break-all;
+  background: var(--bg-sub);
+  padding: 8px;
+  border-radius: 6px;
+}
+
+@media (width <= 600px) {
+  body {
+    font-size: 16px;
+  }
+
+  .todo-item {
+    padding: 10px 4px;
+  }
+
+  .header {
+    gap: 12px;
+  }
+
+  .email {
+    display: none;
+  }
+
+  .help-button {
+    margin-left: auto;
+  }
+
+  .tokens th:nth-child(2),
+  .tokens td:nth-child(2) {
+    display: none;
+  }
+}

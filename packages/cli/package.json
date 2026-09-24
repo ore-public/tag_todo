@@ -1,0 +1,35 @@
+{
+  "name": "tagtodo",
+  "version": "0.1.0",
+  "description": "tag_todo の CLI。AI エージェントからの利用を想定し、全コマンドで JSON 出力に対応する",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "tagtodo": "./dist/index.mjs"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "commander": "^15.0.0"
+  },
+  "devDependencies": {
+    "@tag-todo/shared": "workspace:*",
+    "@types/node": "^24",
+    "@vitest/coverage-v8": "~4.1.11",
+    "tsdown": "^0.23.0",
+    "typescript": "~6.0.3",
+    "vitest": "~4.1.11",
+    "zod": "^4.6.5"
+  }
+}

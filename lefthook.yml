@@ -1,0 +1,12 @@
+# コミット時に、変更したファイルだけ lint とフォーマットを行う。全体のチェックは CI で行う
+pre-commit:
+  parallel: true
+  jobs:
+    - name: eslint
+      glob: "*.{js,cjs,ts,tsx}"
+      run: pnpm exec eslint --fix --max-warnings 0 {staged_files}
+      stage_fixed: true
+    - name: prettier
+      glob: "*.{js,cjs,ts,tsx,json,jsonc,css,html,md,yml,yaml}"
+      run: pnpm exec prettier --write --ignore-unknown {staged_files}
+      stage_fixed: true

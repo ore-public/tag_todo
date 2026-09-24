@@ -1,0 +1,17 @@
+{
+  "threshold": 3,
+  "minTokens": 60,
+  "reporters": ["console"],
+  "path": ["apps", "packages"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/.wrangler/**",
+    "**/worker-configuration.d.ts",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ],
+  "absolute": false,
+  "gitignore": true
+}

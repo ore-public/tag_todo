@@ -1,0 +1,17 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": ["e2e/**/*.ts"]
+    },
+    "apps/worker": {
+      "entry": ["test/**/*.ts"],
+      "ignoreDependencies": ["cloudflare"]
+    },
+    "apps/web": {
+      "entry": ["test/**/*.{ts,tsx}"]
+    },
+    "packages/cli": {},
+    "packages/shared": {}
+  }
+}

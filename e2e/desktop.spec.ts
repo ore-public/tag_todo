@@ -1,0 +1,85 @@
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
+
+test.beforeEach(async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByText("todo はありません")).toBeVisible();
+});
+
+async function addTodo(page: Page, text: string) {
+  await page.keyboard.press("o");
+  await page.keyboard.type(text);
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("Escape");
+}
+
+test("キーボードだけで追加・移動・実施日の変更・完了ができる", async ({ page }) => {
+  await addTodo(page, "一つ目 #仕事 @today");
+  await expect(page.getByRole("button", { name: "一つ目" })).toBeVisible();
+  await addTodo(page, "二つ目 @today !+1d");
+  await expect(page.getByRole("button", { name: "二つ目" })).toBeVisible();
+
+  const today = page.getByRole("region", { name: /^今日/ });
+  await expect(today).toContainText("一つ目");
+  await expect(today).toContainText("二つ目");
+  await expect(today.getByText("#仕事")).toBeVisible();
+  await expect(today.getByText(/期限間近/)).toBeVisible();
+
+  const selected = page.locator('[aria-current="true"]');
+  await expect(selected).toContainText("一つ目");
+  await page.keyboard.press("j");
+  await expect(selected).toContainText("二つ目");
+
+  // Ctrl+j で明日に移動し、選択は二つ目のまま
+  await page.keyboard.press("Control+j");
+  await expect(page.getByRole("region", { name: /^明日/ })).toContainText("二つ目");
+  await expect(selected).toContainText("二つ目");
+
+  // 再読み込みしてもサーバーに保存されている
+  await page.reload();
+  await expect(page.getByRole("region", { name: /^明日/ })).toContainText("二つ目");
+
+  // 再読み込み後はカーソルが先頭（一つ目）に戻る
+  await expect(selected).toContainText("一つ目");
+  await page.keyboard.press("x");
+  await expect(page.getByRole("button", { name: "一つ目" })).toBeHidden();
+  await expect(selected).toContainText("二つ目");
+});
+
+test("タグで絞り込み、編集・削除ができる", async ({ page }) => {
+  await addTodo(page, "仕事の todo #仕事");
+  await addTodo(page, "家の todo #家");
+  await expect(page.getByRole("button", { name: "家の todo" })).toBeVisible();
+
+  await page.keyboard.press("/");
+  await page.getByLabel("タグで絞り込み").selectOption("家");
+  await expect(page.getByRole("button", { name: "仕事の todo" })).toBeHidden();
+  await page.keyboard.press("Escape");
+
+  await page.keyboard.press("t");
+  await page.keyboard.type(" 急ぎ");
+  await page.keyboard.press("Enter");
+  await expect(page.getByText("#急ぎ", { exact: true })).toBeVisible();
+
+  await page.keyboard.press("d");
+  await expect(page.getByRole("dialog", { name: "todo の削除" })).toBeVisible();
+  await page.keyboard.press("Enter");
+  await expect(page.getByText("todo はありません")).toBeVisible();
+});
+
+test("API トークンを発行すると、そのトークンで外部クライアント用 API を使える", async ({ page, request }) => {
+  await page.getByRole("link", { name: "API トークン" }).click();
+  await page.getByLabel("トークンの名前").fill("E2E");
+  await page.getByRole("button", { name: "発行" }).click();
+  const token = await page.locator(".issued-token code").first().textContent();
+  expect(token).toMatch(/^tagtodo_/);
+
+  const res = await request.post("/api/v1/todos", {
+    headers: { Authorization: `Bearer ${token ?? ""}` },
+    data: { title: "CLI から追加", tags: ["cli"] },
+  });
+  expect(res.status()).toBe(201);
+
+  await page.getByRole("link", { name: "todo" }).click();
+  await expect(page.getByRole("button", { name: "CLI から追加" })).toBeVisible();
+});

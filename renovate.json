@@ -1,0 +1,27 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", ":semanticCommitsDisabled"],
+  "timezone": "Asia/Tokyo",
+  "schedule": ["before 9am on monday"],
+  "minimumReleaseAge": "3 days",
+  "rangeStrategy": "bump",
+  "packageRules": [
+    {
+      "description": "開発用ツールのマイナー・パッチ更新は、CI が通れば自動でマージする",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true
+    },
+    {
+      "description": "Vitest と Workers のテスト環境は互換性のあるバージョンをそろえて更新する",
+      "matchPackageNames": ["vitest", "@vitest/**", "@cloudflare/vitest-pool-workers"],
+      "groupName": "vitest"
+    },
+    {
+      "description": "typescript-eslint が対応するまで TypeScript のメジャー更新は行わない",
+      "matchPackageNames": ["typescript"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    }
+  ]
+}
