@@ -1,4 +1,5 @@
 import type { Route } from "../hooks/useRoute";
+import { LOGOUT_PATH } from "../lib/errors";
 
 interface Props {
   route: Route;
@@ -28,6 +29,9 @@ export function Header({ route, email, onNavigate, onHelp }: Readonly<Props>) {
         {link("tokens", "API トークン")}
       </nav>
       <span className="email">{email}</span>
+      <a href={LOGOUT_PATH} className="logout">
+        ログアウト
+      </a>
       <button type="button" className="help-button" onClick={onHelp} aria-label="キーボード操作のヘルプ">
         ?
       </button>

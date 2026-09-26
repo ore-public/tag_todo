@@ -8,10 +8,13 @@ export class ApiError extends Error {
   }
 }
 
-/** Access のログインが切れると、fetch はログイン画面への転送で失敗する */
+/** ログインしていない（セッションの期限が切れた）ときのエラー。ログイン画面へ移動する */
 export class SessionExpiredError extends Error {
   constructor() {
-    super("ログインの有効期限が切れました。ページを再読み込みしてください。");
+    super("ログインが必要です。");
     this.name = "SessionExpiredError";
   }
 }
+
+export const LOGIN_PATH = "/auth/login";
+export const LOGOUT_PATH = "/auth/logout";

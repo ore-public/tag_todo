@@ -2,13 +2,13 @@
   "threshold": 3,
   "minTokens": 60,
   "reporters": ["console"],
-  "path": ["apps", "packages"],
+  "path": ["apps", "packages", "infra"],
   "ignore": [
     "**/node_modules/**",
     "**/dist/**",
     "**/coverage/**",
-    "**/.wrangler/**",
-    "**/worker-configuration.d.ts",
+    "**/cdk.out/**",
+    "apps/api/src/db/schema.ts",
     "**/*.test.ts",
     "**/*.test.tsx"
   ],

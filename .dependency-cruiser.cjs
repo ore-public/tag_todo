@@ -29,6 +29,13 @@ module.exports = {
       to: { path: "^(apps/[^/]+|packages/cli)/", pathNot: "^$1/" },
     },
     {
+      name: "infra-independent",
+      severity: "error",
+      comment: "infra はアプリのコードを import しない（Lambda のコードはファイルのパスで参照する）",
+      from: { path: "^infra/" },
+      to: { path: "^(apps|packages)/" },
+    },
+    {
       name: "shared-independent",
       severity: "error",
       comment: "packages/shared は他のワークスペースに依存しない",
@@ -42,27 +49,27 @@ module.exports = {
       from: { path: "/src/", pathNot: "\\.test\\.tsx?$" },
       to: { path: "(\\.test\\.tsx?$|/test/)" },
     },
-    // worker: ルーティング(http) → ユースケース(usecases) → DB アクセス(db) の一方向
+    // api: ルーティング(http) → ユースケース(usecases) → DB アクセス(db) の一方向
     {
       name: "worker-db-layer",
       severity: "error",
       comment: "db は usecases と http に依存しない",
-      from: { path: "^apps/worker/src/db/" },
-      to: { path: "^apps/worker/src/(usecases|http)/" },
+      from: { path: "^apps/api/src/db/" },
+      to: { path: "^apps/api/src/(usecases|http)/" },
     },
     {
       name: "worker-usecases-layer",
       severity: "error",
       comment: "usecases は http に依存しない",
-      from: { path: "^apps/worker/src/usecases/" },
-      to: { path: "^apps/worker/src/http/" },
+      from: { path: "^apps/api/src/usecases/" },
+      to: { path: "^apps/api/src/http/" },
     },
     {
       name: "worker-http-not-to-db",
       severity: "error",
       comment: "http から db を直接使わず、usecases を通す",
-      from: { path: "^apps/worker/src/http/" },
-      to: { path: "^apps/worker/src/db/" },
+      from: { path: "^apps/api/src/http/" },
+      to: { path: "^apps/api/src/db/" },
     },
     // web: 画面(components) → フック(hooks) → API クライアント(api) の一方向。lib はどこからでも使える
     {
@@ -96,7 +103,7 @@ module.exports = {
   ],
   options: {
     doNotFollow: { path: "node_modules" },
-    exclude: { path: "(/dist/|/coverage/|/\\.wrangler/|worker-configuration\\.d\\.ts$)" },
+    exclude: { path: "(/dist/|/coverage/|/cdk\\.out/)" },
     tsPreCompilationDeps: true,
     enhancedResolveOptions: {
       exportsFields: ["exports"],

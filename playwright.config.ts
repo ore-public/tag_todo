@@ -16,11 +16,17 @@ export default defineConfig({
     { name: "desktop", use: { ...devices["Desktop Chrome"] }, testMatch: "desktop.spec.ts" },
     { name: "mobile", use: { ...devices["Pixel 7"] }, testMatch: "mobile.spec.ts" },
   ],
-  // ビルドした SPA を、開発モード（Access の検証なし）の Worker で配信する
+  // ビルドした SPA を、開発モード（ログインなし）の API サーバーで配信する。PostgreSQL は docker compose で起動しておく
   webServer: {
-    command: "pnpm --filter @tag-todo/web build && pnpm --filter @tag-todo/worker e2e:serve",
+    command: "pnpm --filter @tag-todo/web build && pnpm --filter @tag-todo/api e2e:serve",
     url: `http://localhost:${String(PORT)}/api/me`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      PORT: String(PORT),
+      PUBLIC_ORIGIN: `http://localhost:${String(PORT)}`,
+      WEB_DIST: "../web/dist",
+      DEV_USER_EMAIL: "e2e@example.com",
+    },
   },
 });
