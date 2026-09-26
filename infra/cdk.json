@@ -6,7 +6,7 @@
       "hostedZoneId": "Z1MA54NBZ7BYPC",
       "appSubdomain": "todo",
       "authSubdomain": "auth",
-      "githubRepository": "ore-public/tag_todo",
+      "githubOidcSubjectPrefix": "repo:ore-public@1182635/tag_todo@1386491972",
       "createGithubOidcProvider": false
     },
     "@aws-cdk/core:defaultCrossStackReferences": "strong"

@@ -8,7 +8,7 @@ const settings = {
   hostedZoneId: "Z123",
   appSubdomain: "todo",
   authSubdomain: "auth",
-  githubRepository: "owner/repo",
+  githubOidcSubjectPrefix: "repo:owner@1/repo@2",
   createGithubOidcProvider: true,
 };
 
@@ -125,7 +125,7 @@ describe("GitHub Actions 用のデプロイロール", () => {
             Condition: {
               StringEquals: {
                 "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
-                "token.actions.githubusercontent.com:sub": "repo:owner/repo:environment:production",
+                "token.actions.githubusercontent.com:sub": "repo:owner@1/repo@2:environment:production",
               },
             },
           }),

@@ -54,7 +54,7 @@ export class GithubDeployRole extends Construct {
       assumedBy: new WebIdentityPrincipal(provider.openIdConnectProviderArn, {
         StringEquals: {
           [`${GITHUB_OIDC_HOST}:aud`]: "sts.amazonaws.com",
-          [`${GITHUB_OIDC_HOST}:sub`]: `repo:${props.settings.githubRepository}:environment:production`,
+          [`${GITHUB_OIDC_HOST}:sub`]: `${props.settings.githubOidcSubjectPrefix}:environment:production`,
         },
       }),
     });
