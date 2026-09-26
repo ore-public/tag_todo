@@ -3,11 +3,11 @@
   "context": {
     "tagTodo": {
       "domainName": "office-ore.net",
-      "hostedZoneId": "Z0000000000000000000",
+      "hostedZoneId": "Z1MA54NBZ7BYPC",
       "appSubdomain": "todo",
       "authSubdomain": "auth",
       "githubRepository": "ore-public/tag_todo",
-      "createGithubOidcProvider": true
+      "createGithubOidcProvider": false
     },
     "@aws-cdk/core:defaultCrossStackReferences": "strong"
   }
