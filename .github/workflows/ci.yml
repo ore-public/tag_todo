@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:17
+        image: postgres:16
         env:
           POSTGRES_USER: tagtodo
           POSTGRES_PASSWORD: tagtodo
@@ -49,7 +49,7 @@ jobs:
       pull-requests: write
     services:
       postgres:
-        image: postgres:17
+        image: postgres:16
         env:
           POSTGRES_USER: tagtodo
           POSTGRES_PASSWORD: tagtodo
@@ -103,7 +103,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:17
+        image: postgres:16
         env:
           POSTGRES_USER: tagtodo
           POSTGRES_PASSWORD: tagtodo

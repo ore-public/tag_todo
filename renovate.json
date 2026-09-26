@@ -22,6 +22,19 @@
       "matchPackageNames": ["typescript"],
       "matchUpdateTypes": ["major"],
       "enabled": false
+    },
+    {
+      "description": "eslint-plugin-jsx-a11y が対応するまで ESLint のメジャー更新は行わない",
+      "matchPackageNames": ["eslint", "@eslint/js"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
+    },
+    {
+      "description": "ローカルと CI の PostgreSQL は、本番の Aurora DSQL（PostgreSQL 16 互換）に合わせる",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["postgres"],
+      "matchUpdateTypes": ["major"],
+      "enabled": false
     }
   ]
 }
