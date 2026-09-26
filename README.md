@@ -86,6 +86,7 @@ main にマージすると、CI が自動でデプロイする。
 ### 初回セットアップ
 
 1. `infra/cdk.json` の `hostedZoneId` に、Route53 の `office-ore.net` のホストゾーン ID を書く
+   - `githubOidcSubjectPrefix` には、`gh api repos/<owner>/<repo>/actions/oidc/customization/sub` の `sub_claim_prefix` を書く（GitHub Actions からデプロイ用のロールを引き受ける条件）
    - アカウントに GitHub の OIDC プロバイダーが既にあれば、`createGithubOidcProvider` を `false` にする
 2. `office-ore.net` 自体に A レコードがあることを確認する（Cognito の独自ドメインの要件）
 3. 手元で AWS にログインし、CDK の準備と1回目のデプロイを行う
