@@ -4,7 +4,7 @@ import type { SqlClient } from "../src/db/migrations";
 
 const ROLE_ARN = "arn:aws:iam::123456789012:role/TagTodoApi";
 
-function recordingClient(options: { roleExists: boolean; grantError?: Error }) {
+function recordingClient(options: { roleExists: boolean; mapped?: boolean }) {
   const executed: string[] = [];
   const client: SqlClient = {
     query: (sql) => {
@@ -12,7 +12,8 @@ function recordingClient(options: { roleExists: boolean; grantError?: Error }) {
       if (sql.startsWith("SELECT 1 FROM pg_roles")) return Promise.resolve({ rows: options.roleExists ? [{}] : [] });
       if (sql.startsWith("SELECT tablename"))
         return Promise.resolve({ rows: [{ tablename: "todos" }, { tablename: "tags" }] });
-      if (sql.startsWith("AWS IAM GRANT") && options.grantError) return Promise.reject(options.grantError);
+      if (sql.startsWith("SELECT 1 FROM sys.iam_pg_role_mappings"))
+        return Promise.resolve({ rows: options.mapped ? [{}] : [] });
       return Promise.resolve({ rows: [] });
     },
   };
@@ -28,23 +29,20 @@ describe("grantAppRole", () => {
     expect(executed.filter((sql) => !sql.startsWith("SELECT"))).toEqual([
       "CREATE ROLE tagtodo_app WITH LOGIN",
       `AWS IAM GRANT tagtodo_app TO '${ROLE_ARN}'`,
-      "GRANT USAGE ON SCHEMA public TO tagtodo_app",
       "GRANT SELECT, INSERT, UPDATE, DELETE ON public.todos TO tagtodo_app",
       "GRANT SELECT, INSERT, UPDATE, DELETE ON public.tags TO tagtodo_app",
     ]);
   });
 
-  it("ロールが既にあり、対応付け済みでもエラーにしない", async () => {
-    const { client, executed } = recordingClient({ roleExists: true, grantError: new Error("mapping already exists") });
+  it("ロールが既にあり、IAM ロールと対応付け済みなら、テーブルの権限だけ付け直す", async () => {
+    const { client, executed } = recordingClient({ roleExists: true, mapped: true });
 
     await grantAppRole(client, "tagtodo_app", ROLE_ARN);
 
-    expect(executed).not.toContain("CREATE ROLE tagtodo_app WITH LOGIN");
-  });
-
-  it("対応付けがそれ以外の理由で失敗したらエラーにする", async () => {
-    const { client } = recordingClient({ roleExists: true, grantError: new Error("permission denied") });
-    await expect(grantAppRole(client, "tagtodo_app", ROLE_ARN)).rejects.toThrow("permission denied");
+    expect(executed.filter((sql) => !sql.startsWith("SELECT"))).toEqual([
+      "GRANT SELECT, INSERT, UPDATE, DELETE ON public.todos TO tagtodo_app",
+      "GRANT SELECT, INSERT, UPDATE, DELETE ON public.tags TO tagtodo_app",
+    ]);
   });
 
   it.each([

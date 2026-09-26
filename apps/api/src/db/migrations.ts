@@ -47,8 +47,9 @@ async function runStatement(client: SqlClient, statement: string, dialect: Diale
   const { rows } = await client.query(toDsqlStatement(statement));
   const jobId = rows[0]?.job_id;
   if (typeof jobId !== "string") return;
-  const { rows: waited } = await client.query("SELECT sys.wait_for_job($1) AS ok", [jobId]);
-  if (waited[0]?.ok !== true) throw new Error(`インデックスの作成に失敗しました (job_id: ${jobId})`);
+  // sys.wait_for_job はプロシージャなので CALL で呼ぶ。結果は { succeeded: boolean }
+  const { rows: waited } = await client.query("CALL sys.wait_for_job($1)", [jobId]);
+  if (waited[0]?.succeeded !== true) throw new Error(`インデックスの作成に失敗しました (job_id: ${jobId})`);
 }
 
 /**

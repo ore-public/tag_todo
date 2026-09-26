@@ -13,13 +13,12 @@ export async function grantAppRole(client: SqlClient, role: string, iamRoleArn: 
 
   const { rows: roles } = await client.query("SELECT 1 FROM pg_roles WHERE rolname = $1", [role]);
   if (roles.length === 0) await client.query(`CREATE ROLE ${role} WITH LOGIN`);
-  try {
-    await client.query(`AWS IAM GRANT ${role} TO '${iamRoleArn}'`);
-  } catch (error) {
-    // 既に対応付け済みならそのまま進める
-    if (!(error instanceof Error && error.message.includes("already"))) throw error;
-  }
-  await client.query(`GRANT USAGE ON SCHEMA public TO ${role}`);
+  const { rows: mappings } = await client.query(
+    "SELECT 1 FROM sys.iam_pg_role_mappings WHERE pg_role_name = $1 AND arn = $2",
+    [role, iamRoleArn],
+  );
+  if (mappings.length === 0) await client.query(`AWS IAM GRANT ${role} TO '${iamRoleArn}'`);
+  // public スキーマの USAGE は DSQL では全ロールに付いていて、GRANT できない（system entity 扱い）
   const { rows: tables } = await client.query(
     "SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> 'schema_migrations'",
   );

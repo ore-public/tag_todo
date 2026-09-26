@@ -62,19 +62,19 @@ describe("migrate", () => {
   it("DSQL ではインデックスを非同期で作り、完了を待つ", async () => {
     const { client, executed } = recordingClient({
       "CREATE INDEX ASYNC": [{ job_id: "job-1" }],
-      "SELECT sys.wait_for_job": [{ ok: true }],
+      "CALL sys.wait_for_job": [{ succeeded: true }],
     });
 
     await migrate(client, migrations.slice(0, 1), "dsql");
 
     expect(executed).toContain("CREATE INDEX ASYNC a_id ON a (id)");
-    expect(executed).toContain('SELECT sys.wait_for_job($1) AS ok ["job-1"]');
+    expect(executed).toContain('CALL sys.wait_for_job($1) ["job-1"]');
   });
 
   it("DSQL でインデックスの作成に失敗したらエラーにする", async () => {
     const { client } = recordingClient({
       "CREATE INDEX ASYNC": [{ job_id: "job-1" }],
-      "SELECT sys.wait_for_job": [{ ok: false }],
+      "CALL sys.wait_for_job": [{ succeeded: false }],
     });
 
     await expect(migrate(client, migrations.slice(0, 1), "dsql")).rejects.toThrow("インデックスの作成に失敗しました");
