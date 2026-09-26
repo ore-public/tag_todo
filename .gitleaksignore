@@ -1,0 +1,3 @@
+# gitleaks の誤検知を除外する（1行に1件、gitleaks が出力する Fingerprint を書く）
+# テスト用のダミーの署名鍵。値は後のコミットで "x".repeat(32) に変更済み
+444b6f7ac77d8007ccae0c6f4850652924218de6:apps/api/test/oidcAuth.test.ts:generic-api-key:24
