@@ -21,7 +21,8 @@ const app = createApp({
         issuer: ISSUER,
         clientId: CLIENT_ID,
         clientSecret: "test-secret",
-        sessionSecret: "0123456789abcdef0123456789abcdef",
+        // テスト用の署名鍵（ライブラリの要件の 32 文字）
+        sessionSecret: "x".repeat(32),
         logoutEndpoint: `${AUTH_DOMAIN}/logout`,
       },
     },

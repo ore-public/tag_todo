@@ -151,6 +151,10 @@ jobs:
   security:
     name: セキュリティ
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # gitleaks が検出結果をプルリクエストにコメントするため
+      pull-requests: write
     steps:
       - uses: actions/checkout@v7
         with:
