@@ -16,6 +16,20 @@ jobs:
   check:
     name: 静的チェック
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: tagtodo
+          POSTGRES_PASSWORD: tagtodo
+          POSTGRES_DB: tagtodo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tagtodo"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -29,6 +43,24 @@ jobs:
   test:
     name: テスト
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # カバレッジのレポートをプルリクエストにコメントするため
+      pull-requests: write
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: tagtodo
+          POSTGRES_PASSWORD: tagtodo
+          POSTGRES_DB: tagtodo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tagtodo"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -39,10 +71,50 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # カバレッジが下限を下回ると失敗する
       - run: pnpm test:coverage
+      # カバレッジをプルリクエストのコメントと、実行結果のまとめ（Job Summary）に表示する
+      - uses: davelosert/vitest-coverage-report-action@v2
+        if: ${{ !cancelled() }}
+        with:
+          name: shared
+          working-directory: packages/shared
+      - uses: davelosert/vitest-coverage-report-action@v2
+        if: ${{ !cancelled() }}
+        with:
+          name: cli
+          working-directory: packages/cli
+      - uses: davelosert/vitest-coverage-report-action@v2
+        if: ${{ !cancelled() }}
+        with:
+          name: api
+          working-directory: apps/api
+      - uses: davelosert/vitest-coverage-report-action@v2
+        if: ${{ !cancelled() }}
+        with:
+          name: web
+          working-directory: apps/web
+      - uses: davelosert/vitest-coverage-report-action@v2
+        if: ${{ !cancelled() }}
+        with:
+          name: infra
+          working-directory: infra
 
   e2e:
     name: E2E テスト
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: tagtodo
+          POSTGRES_PASSWORD: tagtodo
+          POSTGRES_DB: tagtodo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tagtodo"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -71,10 +143,10 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # web のビルド結果を worker が配信するため、web を先にビルドする
       - run: pnpm --filter @tag-todo/web build
-      - run: pnpm --filter @tag-todo/worker build
       - run: pnpm --filter tagtodo build
+      # Lambda のコードのバンドルと cdk-nag の検査を含む
+      - run: pnpm --filter @tag-todo/infra synth
 
   security:
     name: セキュリティ
@@ -99,6 +171,9 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: production
+    permissions:
+      contents: read
+      id-token: write
     concurrency:
       group: deploy-production
       cancel-in-progress: false
@@ -110,9 +185,38 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # GitHub の OIDC で、デプロイ用の IAM ロールを引き受ける（アクセスキーは使わない）
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ap-northeast-1
       - run: pnpm --filter @tag-todo/web build
-      # マイグレーションを適用してから、新しいコードをデプロイする
-      - run: pnpm --filter @tag-todo/worker deploy
+      - name: インフラと API のデプロイ
+        run: pnpm --filter @tag-todo/infra exec cdk deploy --all --require-approval never --outputs-file cdk-outputs.json
+      - name: デプロイ結果の読み込み
+        id: outputs
+        run: |
+          node -e '
+            const o = require("./infra/cdk-outputs.json").TagTodoApp;
+            const lines = [
+              `dsql-endpoint=${o.DsqlEndpoint}`,
+              `api-role-arn=${o.ApiRoleArn}`,
+              `web-bucket=${o.WebBucketName}`,
+              `distribution-id=${o.DistributionId}`,
+            ];
+            require("fs").appendFileSync(process.env.GITHUB_OUTPUT, lines.join("\n") + "\n");
+          '
+      - name: マイグレーションの適用と DB ロールへの権限付与
+        run: pnpm --filter @tag-todo/api db:migrate
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DSQL_ENDPOINT: ${{ steps.outputs.outputs.dsql-endpoint }}
+          APP_ROLE_ARN: ${{ steps.outputs.outputs.api-role-arn }}
+      - name: SPA の配置
+        run: |
+          # ファイル名にハッシュが付くファイルは長くキャッシュし、それ以外（index.html など）は毎回確認させる
+          aws s3 sync apps/web/dist/assets "s3://${BUCKET}/assets" --delete --cache-control "public, max-age=31536000, immutable"
+          aws s3 sync apps/web/dist "s3://${BUCKET}" --delete --exclude "assets/*" --cache-control "no-cache"
+          aws cloudfront create-invalidation --distribution-id "${DISTRIBUTION_ID}" --paths "/*"
+        env:
+          BUCKET: ${{ steps.outputs.outputs.web-bucket }}
+          DISTRIBUTION_ID: ${{ steps.outputs.outputs.distribution-id }}

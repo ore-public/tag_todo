@@ -13,8 +13,8 @@
       "automerge": true
     },
     {
-      "description": "Vitest と Workers のテスト環境は互換性のあるバージョンをそろえて更新する",
-      "matchPackageNames": ["vitest", "@vitest/**", "@cloudflare/vitest-pool-workers"],
+      "description": "Vitest 本体と関連パッケージはバージョンをそろえて更新する",
+      "matchPackageNames": ["vitest", "@vitest/**"],
       "groupName": "vitest"
     },
     {

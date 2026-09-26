@@ -26,7 +26,7 @@ async function request(path: string, init: { method?: string; body?: string } = 
       redirect: "error",
     });
   } catch {
-    throw new SessionExpiredError();
+    throw new ApiError(0, "サーバーに接続できません。通信状況を確認してください。");
   }
   if (res.status === 204) return undefined;
   const body: unknown = await res.json().catch(() => undefined);

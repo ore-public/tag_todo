@@ -2,16 +2,22 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
-      "entry": ["e2e/**/*.ts"]
-    },
-    "apps/worker": {
-      "entry": ["test/**/*.ts"],
-      "ignoreDependencies": ["cloudflare"]
+      "entry": ["e2e/**/*.ts"],
+      "ignoreDependencies": ["esbuild"]
     },
     "apps/web": {
       "entry": ["test/**/*.{ts,tsx}"]
     },
     "packages/cli": {},
-    "packages/shared": {}
+    "packages/shared": {},
+    "apps/api": {
+      "entry": ["src/lambda.ts", "scripts/*.ts", "test/**/*.ts"],
+      "ignore": ["src/db/schema.ts"],
+      "ignoreDependencies": ["@aws-sdk/credential-providers", "@aws-sdk/dsql-signer"]
+    },
+    "infra": {
+      "entry": ["bin/app.ts", "test/**/*.ts"],
+      "ignoreDependencies": ["tsx"]
+    }
   }
 }

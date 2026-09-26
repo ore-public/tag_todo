@@ -126,6 +126,12 @@ button.danger {
   white-space: nowrap;
 }
 
+.logout {
+  color: var(--fg-sub);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
 .help-button {
   border-radius: 50%;
   width: 28px;

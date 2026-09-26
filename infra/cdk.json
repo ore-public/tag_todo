@@ -1,0 +1,14 @@
+{
+  "app": "tsx bin/app.ts",
+  "context": {
+    "tagTodo": {
+      "domainName": "office-ore.net",
+      "hostedZoneId": "Z0000000000000000000",
+      "appSubdomain": "todo",
+      "authSubdomain": "auth",
+      "githubRepository": "ore-public/tag_todo",
+      "createGithubOidcProvider": true
+    },
+    "@aws-cdk/core:defaultCrossStackReferences": "strong"
+  }
+}

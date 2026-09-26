@@ -12,8 +12,9 @@ export default tseslint.config(
       "**/node_modules/",
       "**/dist/",
       "**/coverage/",
-      "**/.wrangler/",
-      "**/worker-configuration.d.ts",
+      "**/cdk.out/",
+      // kysely-codegen で自動生成する
+      "apps/api/src/db/schema.ts",
       "playwright-report/",
       "test-results/",
     ],
@@ -43,6 +44,8 @@ export default tseslint.config(
       "@typescript-eslint/consistent-type-imports": "error",
       // 日本語のメッセージやテスト名で誤検知が多いため無効にする
       "sonarjs/no-hardcoded-passwords": "off",
+      // "todo" はこのアプリの用語で、コメント中の "todo" を TODO コメントと誤検知するため無効にする
+      "sonarjs/todo-tag": "off",
     },
   },
   {
@@ -72,6 +75,11 @@ export default tseslint.config(
       "sonarjs/no-nested-functions": "off",
       "sonarjs/publicly-writable-directories": "off",
     },
+  },
+  {
+    // CDK の Template.hasResourceProperties などを検証として認識しないため
+    files: ["infra/test/**/*.ts"],
+    rules: { "sonarjs/assertions-in-tests": "off" },
   },
   {
     files: ["**/*.js", "**/*.cjs"],

@@ -1,3 +1,0 @@
-# ローカル開発用。.dev.vars にコピーして使う。
-# 設定すると Access の検証を行わず、このメールアドレスのユーザーとして扱う（ACCESS_AUD が空のときのみ有効）
-DEV_USER_EMAIL=dev@example.com

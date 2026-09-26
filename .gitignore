@@ -1,9 +1,9 @@
 node_modules/
 dist/
 coverage/
-.wrangler/
-.dev.vars
 *.local
 test-results/
 playwright-report/
 .DS_Store
+cdk.out/
+infra/cdk-outputs.json
