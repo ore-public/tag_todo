@@ -11,8 +11,8 @@
 ## 構成
 
 ```
-ブラウザ ──https://todo.office-ore.net──▶ CloudFront ─┬─ /*              → S3（SPA）
-CLI     ──Bearer トークン─────────────────▶            └─ /api/* /auth/*  → API Gateway → Lambda（Hono）→ Aurora DSQL
+ブラウザ ──https://todo.office-ore.net──▶ CloudFront ─┬─ /*                      → S3（SPA）
+CLI     ──Bearer トークン─────────────────▶            └─ /api/* /auth/* /ical/*  → API Gateway → Lambda（Hono）→ Aurora DSQL
 ログイン画面 https://auth.office-ore.net（Cognito）
 ```
 
@@ -30,6 +30,7 @@ CLI     ──Bearer トークン───────────────�
 - `/auth/*`：ログイン・ログアウト。`@hono/oidc-auth` が Cognito とのやりとりと、セッションの Cookie を扱う
 - `/api/*`：Web 画面用。セッションの Cookie で認証する。未ログインなら 401 を返し、SPA がログイン画面へ移動する
 - `/api/v1/*`：CLI・外部アプリ用。Web 画面で発行した API トークンで認証する（`Authorization: Bearer <トークン>`）
+- `/ical/<フィード用トークン>.ics`：Google Calendar などに登録する iCal フィード。未完了の todo を、実施日（なければ期限日）の終日の予定として返す。カレンダーアプリは認証ヘッダーを付けられないため、Web 画面で発行したフィード用トークンを URL に含めて認証する。フィード用トークンは todo を読むことだけに使え、API トークンとは別に発行・失効する
 
 ### DB
 

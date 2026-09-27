@@ -2,6 +2,7 @@ import { Hono, type MiddlewareHandler } from "hono";
 import { except } from "hono/combine";
 import { cors } from "hono/cors";
 import type { Database } from "../usecases/database";
+import { API_TOKEN, CALENDAR_FEED_TOKEN } from "../usecases/tokens";
 import type { AppConfig } from "./config";
 import type { AppEnv } from "./env";
 import { handleError, handleNotFound } from "./errors";
@@ -10,6 +11,7 @@ import { originCheck } from "./middleware/originCheck";
 import { sessionAuth } from "./middleware/sessionAuth";
 import { tokenAuth } from "./middleware/tokenAuth";
 import { authRoutes, oidcSettings } from "./routes/auth";
+import { icalRoutes } from "./routes/ical";
 import { meRoutes } from "./routes/me";
 import { tagRoutes } from "./routes/tags";
 import { todoRoutes } from "./routes/todos";
@@ -26,6 +28,7 @@ function webAuth(config: AppConfig): MiddlewareHandler<AppEnv>[] {
  * /auth/*   : ログイン・ログアウト
  * /api/*    : Web 画面用。ログインのセッション（Cookie）で認証する
  * /api/v1/* : CLI・外部アプリ用。API トークンで認証する
+ * /ical/*   : カレンダーアプリ用の iCal フィード。URL に含めたフィード用トークンで認証する
  */
 export function createApp({ db, config }: { db: Database; config: AppConfig }) {
   return new Hono<AppEnv>()
@@ -48,7 +51,9 @@ export function createApp({ db, config }: { db: Database; config: AppConfig }) {
     .route(`${EXTERNAL_API}/tags`, tagRoutes)
     .route("/api/todos", todoRoutes)
     .route("/api/tags", tagRoutes)
-    .route("/api/tokens", tokenRoutes)
+    .route("/api/tokens", tokenRoutes(API_TOKEN))
+    .route("/api/calendar-feeds", tokenRoutes(CALENDAR_FEED_TOKEN))
+    .route("/ical", icalRoutes)
     .route("/api/me", meRoutes)
     .notFound(handleNotFound)
     .onError(handleError);

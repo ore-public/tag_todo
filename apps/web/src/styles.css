@@ -364,6 +364,11 @@ kbd {
   font-size: 13px;
 }
 
+.tokens-page h2 {
+  font-size: 16px;
+  margin-top: 32px;
+}
+
 .tokens {
   width: 100%;
   border-collapse: collapse;

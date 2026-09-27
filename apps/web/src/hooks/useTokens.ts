@@ -1,24 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchTokens, issueToken, revokeToken } from "../api/client";
+import { fetchTokens, issueToken, revokeToken, type TokenResource } from "../api/client";
 
-const TOKENS_KEY = ["tokens"] as const;
+export type { TokenResource } from "../api/client";
 
-export function useTokens() {
-  return useQuery({ queryKey: TOKENS_KEY, queryFn: fetchTokens });
+export function useTokens(resource: TokenResource) {
+  return useQuery({ queryKey: [resource], queryFn: () => fetchTokens(resource) });
 }
 
-export function useIssueToken() {
+export function useIssueToken(resource: TokenResource) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (name: string) => issueToken(name),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: TOKENS_KEY }),
+    mutationFn: (name: string) => issueToken(resource, name),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: [resource] }),
   });
 }
 
-export function useRevokeToken() {
+export function useRevokeToken(resource: TokenResource) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) => revokeToken(id),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: TOKENS_KEY }),
+    mutationFn: (id: number) => revokeToken(resource, id),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: [resource] }),
   });
 }

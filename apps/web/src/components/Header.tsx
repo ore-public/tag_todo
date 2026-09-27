@@ -26,7 +26,7 @@ export function Header({ route, email, onNavigate, onHelp }: Readonly<Props>) {
       <span className="logo">tag todo</span>
       <nav>
         {link("todos", "todo")}
-        {link("tokens", "API トークン")}
+        {link("tokens", "連携設定")}
       </nav>
       <span className="email">{email}</span>
       <a href={LOGOUT_PATH} className="logout">

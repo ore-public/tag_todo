@@ -4,13 +4,24 @@ import { vi } from "vitest";
 /** テスト用に、メモリ上のデータで /api/* に応答する fetch を差し込む */
 export function installFakeApi(initialTodos: Todo[]) {
   const todos = [...initialTodos];
-  const tokens: ApiToken[] = [];
+  const tokens: Record<string, ApiToken[]> = { tokens: [], "calendar-feeds": [] };
   const requests: { method: string; path: string; body: unknown }[] = [];
 
   const json = (body: unknown, status = 200) =>
     new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
+  /** API トークン（/api/tokens）とカレンダーのフィード用トークン（/api/calendar-feeds） */
+  const routeTokens = (method: string, resource: string, body: unknown): Response => {
+    const list = tokens[resource] ?? [];
+    if (method === "GET") return json(list);
+    const token = { id: 1, name: (body as { name: string }).name, createdAt: "2026-09-25T00:00:00Z", lastUsedAt: null };
+    list.push(token);
+    return json({ ...token, token: resource === "tokens" ? "tagtodo_secret" : "tagtodocal_secret" }, 201);
+  };
+
   const route = (method: string, url: URL, body: unknown): Response => {
+    const tokenResource = /^\/api\/(tokens|calendar-feeds)$/.exec(url.pathname)?.[1];
+    if (tokenResource !== undefined) return routeTokens(method, tokenResource, body);
     const id = Number(url.pathname.split("/")[3]);
     const index = todos.findIndex((todo) => todo.id === id);
     const key = `${method} ${url.pathname.replace(/\/\d+$/, "/:id")}`;
@@ -19,18 +30,6 @@ export function installFakeApi(initialTodos: Todo[]) {
         return json({ email: "me@example.com" });
       case "GET /api/tags":
         return json([]);
-      case "GET /api/tokens":
-        return json(tokens);
-      case "POST /api/tokens": {
-        const token = {
-          id: 1,
-          name: (body as { name: string }).name,
-          createdAt: "2026-09-25T00:00:00Z",
-          lastUsedAt: null,
-        };
-        tokens.push(token);
-        return json({ ...token, token: "tagtodo_secret" }, 201);
-      }
       case "GET /api/todos": {
         const status = url.searchParams.get("status");
         return json(status === "all" ? todos : todos.filter((todo) => !todo.done));
