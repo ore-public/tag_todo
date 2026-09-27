@@ -95,7 +95,7 @@ main にマージすると、CI が自動でデプロイする。
    pnpm --filter @tag-todo/infra exec cdk deploy --all
    ```
 4. GitHub の設定
-   - Secrets：`AWS_DEPLOY_ROLE_ARN` に、手順 3 の出力 `TagTodoApp.GithubDeployRoleArn` を登録する。`NPM_TOKEN` は CLI の公開用
+   - Secrets：`AWS_DEPLOY_ROLE_ARN` に、手順 3 の出力 `TagTodoApp.GithubDeployRoleArn` を登録する
    - Environments：`production`（デプロイ）、`npm`（CLI の公開）
    - main のブランチ保護：CI の全ジョブ（静的チェック、テスト、E2E テスト、ビルド、セキュリティ）が通ることを必須にする
    - Renovate（GitHub App）をインストールする
@@ -104,6 +104,12 @@ main にマージすると、CI が自動でデプロイする。
 ### CLI の公開
 
 `packages/cli/package.json` の `version` を更新し、同じバージョンのタグを push する。
+
+npm の認証は Trusted Publishing（GitHub の OIDC）で行うため、npm のトークンは使わない。npm の tagtodo の設定で、Trusted Publisher として次の内容を登録してある。
+
+- リポジトリ：`ore-public/tag_todo`
+- ワークフロー：`release-cli.yml`
+- 環境：`npm`
 
 ```sh
 git tag cli-v0.1.0 && git push origin cli-v0.1.0
