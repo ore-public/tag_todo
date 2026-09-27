@@ -1,6 +1,8 @@
 name: CLI の npm 公開
 
 # cli-v0.1.0 のようなタグを push したときに公開する。タグのバージョンは packages/cli/package.json と一致させること
+# npm の認証は Trusted Publishing（GitHub の OIDC）で行うため、npm のトークンは使わない。
+# provenance（どのリポジトリの CI でビルドしたかの証明）も自動で付く
 on:
   push:
     tags: ["cli-v*"]
@@ -20,13 +22,10 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-          registry-url: https://registry.npmjs.org
       - run: pnpm install --frozen-lockfile
       - name: タグとバージョンが一致するか確認
         run: |
           version=$(node -p "require('./packages/cli/package.json').version")
           test "cli-v${version}" = "${GITHUB_REF_NAME}"
       - run: pnpm --filter tagtodo test
-      - run: pnpm --filter tagtodo publish --provenance --access public --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - run: pnpm --filter tagtodo publish --access public --no-git-checks
