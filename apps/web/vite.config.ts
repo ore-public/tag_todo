@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     // API とログイン処理は、ローカルで起動した API サーバーに転送する
-    proxy: { "/api": "http://localhost:8787", "/auth": "http://localhost:8787" },
+    proxy: { "/api": "http://localhost:8787", "/auth": "http://localhost:8787", "/ical": "http://localhost:8787" },
   },
   test: {
     environment: "jsdom",

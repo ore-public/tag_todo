@@ -68,16 +68,19 @@ export async function fetchTags(): Promise<Tag[]> {
   return z.array(tagSchema).parse(await request("/tags"));
 }
 
-export async function fetchTokens(): Promise<ApiToken[]> {
-  return z.array(apiTokenSchema).parse(await request("/tokens"));
+/** API トークンと、カレンダーのフィード用トークンは同じ形で扱う */
+export type TokenResource = "tokens" | "calendar-feeds";
+
+export async function fetchTokens(resource: TokenResource): Promise<ApiToken[]> {
+  return z.array(apiTokenSchema).parse(await request(`/${resource}`));
 }
 
-export async function issueToken(name: string): Promise<ApiTokenCreated> {
-  return apiTokenCreatedSchema.parse(await request("/tokens", { method: "POST", body: JSON.stringify({ name }) }));
+export async function issueToken(resource: TokenResource, name: string): Promise<ApiTokenCreated> {
+  return apiTokenCreatedSchema.parse(await request(`/${resource}`, { method: "POST", body: JSON.stringify({ name }) }));
 }
 
-export async function revokeToken(id: number): Promise<void> {
-  await request(`/tokens/${String(id)}`, { method: "DELETE" });
+export async function revokeToken(resource: TokenResource, id: number): Promise<void> {
+  await request(`/${resource}/${String(id)}`, { method: "DELETE" });
 }
 
 export async function fetchMe(): Promise<Me> {

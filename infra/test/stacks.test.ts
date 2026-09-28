@@ -77,13 +77,13 @@ describe("アプリ", () => {
     });
   });
 
-  it("API（/api/*・/auth/*）はキャッシュせず、Cookie などをそのまま API Gateway に渡す", () => {
+  it("API（/api/*・/auth/*・/ical/*）はキャッシュせず、Cookie などをそのまま API Gateway に渡す", () => {
     const cachingDisabled = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad";
     const allViewerExceptHost = "b689b0a8-53d0-40ab-baf2-68738e2966ac";
     main.hasResourceProperties("AWS::CloudFront::Distribution", {
       DistributionConfig: Match.objectLike({
         Aliases: ["todo.example.com"],
-        CacheBehaviors: ["/api/*", "/auth/*"].map((pathPattern) =>
+        CacheBehaviors: ["/api/*", "/auth/*", "/ical/*"].map((pathPattern) =>
           Match.objectLike({
             PathPattern: pathPattern,
             CachePolicyId: cachingDisabled,

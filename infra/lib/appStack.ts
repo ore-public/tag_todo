@@ -193,7 +193,7 @@ export class AppStack extends Stack {
           },
         ],
       },
-      additionalBehaviors: { "/api/*": apiBehavior, "/auth/*": apiBehavior },
+      additionalBehaviors: { "/api/*": apiBehavior, "/auth/*": apiBehavior, "/ical/*": apiBehavior },
     });
   }
 

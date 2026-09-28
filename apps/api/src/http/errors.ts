@@ -19,11 +19,16 @@ const AUTH_ERROR_PAGE = `<!doctype html>
 <p><a href="/auth/login">もう一度ログインする</a></p>
 </html>`;
 
+/** iCal フィードの URL はトークンを含むので、ログにはトークンを除いて出す */
+function pathForLog(path: string): string {
+  return path.startsWith("/ical/") ? "/ical/*" : path;
+}
+
 export const handleError: ErrorHandler<AppEnv> = (error, c) => {
   if (error instanceof AppError) {
     return c.json({ error: { code: error.code, message: error.message } }, STATUS_BY_CODE[error.code]);
   }
-  logger.error("リクエストの処理に失敗しました", { path: c.req.path, error });
+  logger.error("リクエストの処理に失敗しました", { path: pathForLog(c.req.path), error });
   if (c.req.path.startsWith("/auth/")) return c.html(AUTH_ERROR_PAGE, 400);
   return c.json({ error: { code: "internal_error", message: "サーバーでエラーが発生しました" } }, 500);
 };

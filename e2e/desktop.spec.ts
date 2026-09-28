@@ -68,10 +68,11 @@ test("タグで絞り込み、編集・削除ができる", async ({ page }) => 
 });
 
 test("API トークンを発行すると、そのトークンで外部クライアント用 API を使える", async ({ page, request }) => {
-  await page.getByRole("link", { name: "API トークン" }).click();
-  await page.getByLabel("トークンの名前").fill("E2E");
-  await page.getByRole("button", { name: "発行" }).click();
-  const token = await page.locator(".issued-token code").first().textContent();
+  await page.getByRole("link", { name: "連携設定" }).click();
+  const section = page.getByRole("region", { name: "API トークン" });
+  await section.getByLabel("トークンの名前").fill("E2E");
+  await section.getByRole("button", { name: "発行" }).click();
+  const token = await section.locator(".issued-token code").first().textContent();
   expect(token).toMatch(/^tagtodo_/);
 
   const res = await request.post("/api/v1/todos", {
@@ -82,4 +83,20 @@ test("API トークンを発行すると、そのトークンで外部クライ�
 
   await page.getByRole("link", { name: "todo" }).click();
   await expect(page.getByRole("button", { name: "CLI から追加" })).toBeVisible();
+});
+
+test("カレンダーのフィード URL を発行すると、その URL で todo を iCal 形式で取得できる", async ({ page, request }) => {
+  await addTodo(page, "カレンダーに出す @today");
+  await expect(page.getByRole("button", { name: "カレンダーに出す" })).toBeVisible();
+
+  await page.getByRole("link", { name: "連携設定" }).click();
+  const section = page.getByRole("region", { name: "カレンダー連携" });
+  await section.getByLabel("フィードの名前").fill("E2E");
+  await section.getByRole("button", { name: "発行" }).click();
+  const url = await section.locator(".issued-token code").first().textContent();
+  expect(url).toMatch(/\/ical\/tagtodocal_.+\.ics$/);
+
+  const res = await request.get(url ?? "");
+  expect(res.status()).toBe(200);
+  expect(await res.text()).toContain("SUMMARY:カレンダーに出す");
 });

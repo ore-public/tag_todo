@@ -19,6 +19,16 @@ export interface ApiTokens {
   user_id: number;
 }
 
+export interface CalendarFeeds {
+  created_at: Generated<string>;
+  id: Generated<number>;
+  last_used_at: string | null;
+  name: string;
+  revoked_at: string | null;
+  token_hash: string;
+  user_id: number;
+}
+
 export interface Tags {
   id: Generated<number>;
   name: string;
@@ -52,6 +62,7 @@ export interface Users {
 
 export interface DB {
   api_tokens: ApiTokens;
+  calendar_feeds: CalendarFeeds;
   tags: Tags;
   todo_tags: TodoTags;
   todos: Todos;
